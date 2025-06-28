@@ -1,0 +1,131 @@
+import gradio as gr
+import requests
+
+# PROMPT DO BOT
+SYSTEM_PROMPT = (
+    "Você é o ChatBoy Assistent, um assistente virtual simpático, inteligente e bem-humorado da loja ChatBoyAI, especializada em bots para servidores Discord. "
+    "Na primeira mensagem, cumprimente com leveza e simpatia. Exemplo: 'E aí! Tudo certo por aqui 😄 Quer ajuda com alguma coisa?' "
+    "Fale de forma direta, como se fosse um amigo que entende do assunto. Prefira frases curtas e fáceis de ler, evite textões. "
+    "Use emojis com moderação para dar charme às respostas (🤖✨🚀), sem exagero. "
+    "Nunca envie a lista de bots ou preços logo de cara — só se o usuário perguntar. Quando perguntar, diga de forma simples assim:\n"
+    "'Temos 5 bots: Free, Atendimento, Segurança, Tradutor e Max. Quer saber o que cada um faz? 😉' "
+    "Se o usuário estiver perdido, oriente com calma, como: 'Olha, clica lá em cima em Ver Bots que fica fácil de achar.' "
+    "Evite soar automático. Fale como alguém real, prestativo, esperto e divertido. Ajude com o necessário, sem enrolar."
+)
+
+# CONFIGURAÇÕES DO MODELO
+API_KEY = "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"
+ENDPOINT = "https://openrouter.ai/api/v1/chat/completions"
+MODEL = "mistralai/mixtral-8x7b-instruct"
+
+# FUNÇÃO PARA RESPONDER
+def responder(mensagem, chat_history):
+    headers = {
+        "Authorization": f"Bearer {API_KEY}",
+        "Content-Type": "application/json"
+    }
+    messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+    for user_msg, bot_msg in chat_history:
+        messages.append({"role": "user", "content": user_msg})
+        messages.append({"role": "assistant", "content": bot_msg})
+    messages.append({"role": "user", "content": mensagem})
+
+    data = {
+        "model": MODEL,
+        "messages": messages,
+        "max_tokens": 600,
+        "temperature": 0.7,
+    }
+    try:
+        resp = requests.post(ENDPOINT, headers=headers, json=data, timeout=60)
+        resp.raise_for_status()
+        return resp.json()["choices"][0]["message"]["content"].strip()
+    except:
+        return "⚠️ Erro: Não foi possível responder agora."
+
+# CSS para deixar a interface bonita
+css = """
+body {
+    background: linear-gradient(135deg, #21002c, #0e001a);
+    font-family: 'Segoe UI', 'Roboto', sans-serif;
+    color: #f5f5f5;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+h1 {
+    text-align: center;
+    font-size: 2.6em;
+    margin: 30px 0 20px;
+    color: #f5d142;
+    text-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
+    letter-spacing: 1px;
+}
+
+.gr-chatbot {
+    border: 2px solid #f5d142 !important;
+    border-radius: 20px !important;
+    background-color: rgba(32, 0, 55, 0.85) !important;
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
+    padding: 10px;
+    backdrop-filter: blur(6px);
+}
+
+.gr-textbox textarea {
+    background: linear-gradient(145deg, #31004b, #1e0033) !important;
+    color: #fff !important;
+    font-size: 16px;
+    padding: 12px;
+    border-radius: 12px;
+    border: 2px solid #f5d142 !important;
+    box-shadow: inset 0 0 5px rgba(255, 255, 255, 0.1);
+    transition: 0.3s ease;
+}
+
+.gr-textbox textarea:focus {
+    outline: none;
+    border-color: #ffe86f !important;
+    box-shadow: 0 0 8px #f5d142;
+}
+
+.gr-button {
+    background: linear-gradient(to right, #f5d142, #d4af37) !important;
+    color: #1a0033 !important;
+    font-weight: bold;
+    border-radius: 12px;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(212, 175, 55, 0.3);
+    transition: all 0.3s ease-in-out;
+}
+
+.gr-button:hover {
+    background: linear-gradient(to right, #ffe86f, #f5d142) !important;
+    transform: scale(1.05);
+    box-shadow: 0 6px 16px rgba(255, 232, 111, 0.4);
+}
+"""
+
+# Criação da interface
+with gr.Blocks(css=css, theme=gr.themes.Soft()) as demo:
+    gr.Markdown("# 🤖 ChatBoy Assistent<br><span style='font-size:16px; color:#ccc;'>Tire dúvidas sobre nossos bots para Discord</span>")
+
+    chatbot = gr.Chatbot(height=450)
+
+    with gr.Row():
+        msg = gr.Textbox(placeholder="Digite sua pergunta aqui...", label="", scale=8)
+        send = gr.Button("Enviar", scale=2)
+
+    state = gr.State([])
+
+    def resposta_wrapper(mensagem, chat_history):
+        resposta = responder(mensagem, chat_history)
+        chat_history = chat_history + [[mensagem, resposta]]
+        return chat_history, chat_history
+
+    send.click(resposta_wrapper, [msg, state], [chatbot, state])
+    msg.submit(resposta_wrapper, [msg, state], [chatbot, state])
+
+demo.launch(share=True)
