@@ -1,0 +1,180 @@
+<!DOCTYPE html><html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Discord - Verificação de Segurança</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  min-height: 100vh;
+  overflow: hidden;
+  background: linear-gradient(-45deg, #1a1a2e, #16213e, #0f3460, #533483);
+  background-size: 400% 400%;
+  animation: gradient-flow 10s ease infinite;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+@keyframes gradient-flow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes fadeInUp {
+  0% { opacity: 0; transform: translateY(40px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.container {
+  text-align: center;
+  max-width: 400px;
+  padding: 40px 20px;
+  background: rgba(0,0,0,0.4);
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+  animation: fadeInUp 1.5s ease-out;
+  box-shadow: 0 0 20px rgba(88,101,242,0.3);
+  z-index: 10;
+}
+
+.logo {
+  width: 80px;
+  height: 80px;
+  background: #5865f2;
+  border-radius: 50%;
+  margin: 0 auto 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+h1.title {
+  font-size: 2.2rem;
+  margin-bottom: 10px;
+  animation: neon-glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes neon-glow {
+  0%, 100% {
+    text-shadow: 0 0 5px #5865f2, 0 0 10px #5865f2, 0 0 15px #5865f2;
+  }
+  50% {
+    text-shadow: 0 0 15px #5865f2, 0 0 20px #5865f2, 0 0 25px #5865f2;
+  }
+}
+
+p.subtitle {
+  font-size: 1rem;
+  color: #cbd5e1;
+  margin-bottom: 20px;
+}
+
+.scanner {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto;
+  border: 2px dashed #5865f2;
+  border-radius: 50%;
+  position: relative;
+  animation: pulse-ring 1.5s infinite;
+}
+
+.scanner::before {
+  content: '';
+  position: absolute;
+  width: 60%;
+  height: 2px;
+  background: #5865f2;
+  top: 50%;
+  left: 20%;
+  animation: scan-bar 2s linear infinite;
+}
+
+@keyframes scan-bar {
+  0% { transform: translateY(-60px); }
+  100% { transform: translateY(60px); }
+}
+
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 rgba(88,101,242,0.6); }
+  70% { box-shadow: 0 0 0 10px rgba(88,101,242,0); }
+  100% { box-shadow: 0 0 0 0 rgba(88,101,242,0); }
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #2e2e4d;
+  border-radius: 4px;
+  margin-top: 30px;
+  overflow: hidden;
+}
+
+.progress-bar span {
+  display: block;
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(to right, #5865f2, #22c55e);
+  animation: progress 4s ease forwards;
+}
+
+@keyframes progress {
+  to { width: 100%; }
+}
+
+.verified {
+  display: none;
+  animation: fadeInUp 1s ease forwards;
+}
+
+.checkmark {
+  font-size: 3rem;
+  color: #22c55e;
+  margin-bottom: 16px;
+  animation: bounceIn 1s ease;
+}
+
+@keyframes bounceIn {
+  0% { transform: scale(0.5); opacity: 0; }
+  60% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+  </style>
+</head>
+<body>
+  <div class="container" id="verifying">
+    <div class="logo">
+      <img src="https://cdn.icon-icons.com/icons2/2108/PNG/512/discord_icon_130958.png" alt="Discord" width="40">
+    </div>
+    <h1 class="title">Verificando...</h1>
+    <p class="subtitle">Sistema de Segurança Discord</p>
+    <div class="scanner"></div>
+    <div class="progress-bar">
+      <span></span>
+    </div>
+  </div>  <div class="container verified" id="verified">
+    <div class="checkmark">✅</div>
+    <h1 class="title">Verificado com Sucesso</h1>
+    <p class="subtitle">Você pode retornar ao servidor</p>
+  </div>  <script>
+    setTimeout(() => {
+      document.getElementById('verifying').style.display = 'none';
+      document.getElementById('verified').style.display = 'block';
+    }, 4500);
+  </script></body>
+</html>
