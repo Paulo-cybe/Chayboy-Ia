@@ -169,7 +169,7 @@ p.subtitle {
     </div>
   </div>  <div class="container verified" id="verified">
     <div class="checkmark">✅</div>
-    <h1 class="title">Verificado com Sucesso</h1>
+    <h1 class="title">Verificado com Sucesso.</h1>
     <p class="subtitle">Você pode retornar ao servidor</p>
   </div>  <script>
     setTimeout(() => {
