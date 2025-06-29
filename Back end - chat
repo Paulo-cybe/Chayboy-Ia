@@ -1,131 +1,180 @@
-import gradio as gr
-import requests
-
-# PROMPT DO BOT
-SYSTEM_PROMPT = (
-    "Você é o ChatBoy Assistent, um assistente virtual simpático, inteligente e bem-humorado da loja ChatBoyAI, especializada em bots para servidores Discord. "
-    "Na primeira mensagem, cumprimente com leveza e simpatia. Exemplo: 'E aí! Tudo certo por aqui 😄 Quer ajuda com alguma coisa?' "
-    "Fale de forma direta, como se fosse um amigo que entende do assunto. Prefira frases curtas e fáceis de ler, evite textões. "
-    "Use emojis com moderação para dar charme às respostas (🤖✨🚀), sem exagero. "
-    "Nunca envie a lista de bots ou preços logo de cara — só se o usuário perguntar. Quando perguntar, diga de forma simples assim:\n"
-    "'Temos 5 bots: Free, Atendimento, Segurança, Tradutor e Max. Quer saber o que cada um faz? 😉' "
-    "Se o usuário estiver perdido, oriente com calma, como: 'Olha, clica lá em cima em Ver Bots que fica fácil de achar.' "
-    "Evite soar automático. Fale como alguém real, prestativo, esperto e divertido. Ajude com o necessário, sem enrolar."
-)
-
-# CONFIGURAÇÕES DO MODELO
-API_KEY = "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"
-ENDPOINT = "https://openrouter.ai/api/v1/chat/completions"
-MODEL = "mistralai/mixtral-8x7b-instruct"
-
-# FUNÇÃO PARA RESPONDER
-def responder(mensagem, chat_history):
-    headers = {
-        "Authorization": f"Bearer {API_KEY}",
-        "Content-Type": "application/json"
-    }
-    messages = [{"role": "system", "content": SYSTEM_PROMPT}]
-    for user_msg, bot_msg in chat_history:
-        messages.append({"role": "user", "content": user_msg})
-        messages.append({"role": "assistant", "content": bot_msg})
-    messages.append({"role": "user", "content": mensagem})
-
-    data = {
-        "model": MODEL,
-        "messages": messages,
-        "max_tokens": 600,
-        "temperature": 0.7,
-    }
-    try:
-        resp = requests.post(ENDPOINT, headers=headers, json=data, timeout=60)
-        resp.raise_for_status()
-        return resp.json()["choices"][0]["message"]["content"].strip()
-    except:
-        return "⚠️ Erro: Não foi possível responder agora."
-
-# CSS para deixar a interface bonita
-css = """
-body {
-    background: linear-gradient(135deg, #21002c, #0e001a);
-    font-family: 'Segoe UI', 'Roboto', sans-serif;
-    color: #f5f5f5;
-    margin: 0;
-    padding: 0;
-    overflow-x: hidden;
+<!DOCTYPE html><html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Discord - Verificação de Segurança</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  min-height: 100vh;
+  overflow: hidden;
+  background: linear-gradient(-45deg, #1a1a2e, #16213e, #0f3460, #533483);
+  background-size: 400% 400%;
+  animation: gradient-flow 10s ease infinite;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
 }
 
-h1 {
-    text-align: center;
-    font-size: 2.6em;
-    margin: 30px 0 20px;
-    color: #f5d142;
-    text-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
-    letter-spacing: 1px;
+@keyframes gradient-flow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
-.gr-chatbot {
-    border: 2px solid #f5d142 !important;
-    border-radius: 20px !important;
-    background-color: rgba(32, 0, 55, 0.85) !important;
-    box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
-    padding: 10px;
-    backdrop-filter: blur(6px);
+@keyframes fadeInUp {
+  0% { opacity: 0; transform: translateY(40px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
 
-.gr-textbox textarea {
-    background: linear-gradient(145deg, #31004b, #1e0033) !important;
-    color: #fff !important;
-    font-size: 16px;
-    padding: 12px;
-    border-radius: 12px;
-    border: 2px solid #f5d142 !important;
-    box-shadow: inset 0 0 5px rgba(255, 255, 255, 0.1);
-    transition: 0.3s ease;
+.container {
+  text-align: center;
+  max-width: 400px;
+  padding: 40px 20px;
+  background: rgba(0,0,0,0.4);
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+  animation: fadeInUp 1.5s ease-out;
+  box-shadow: 0 0 20px rgba(88,101,242,0.3);
+  z-index: 10;
 }
 
-.gr-textbox textarea:focus {
-    outline: none;
-    border-color: #ffe86f !important;
-    box-shadow: 0 0 8px #f5d142;
+.logo {
+  width: 80px;
+  height: 80px;
+  background: #5865f2;
+  border-radius: 50%;
+  margin: 0 auto 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: float 3s ease-in-out infinite;
 }
 
-.gr-button {
-    background: linear-gradient(to right, #f5d142, #d4af37) !important;
-    color: #1a0033 !important;
-    font-weight: bold;
-    border-radius: 12px;
-    border: none;
-    padding: 10px 20px;
-    cursor: pointer;
-    box-shadow: 0 4px 10px rgba(212, 175, 55, 0.3);
-    transition: all 0.3s ease-in-out;
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
 }
 
-.gr-button:hover {
-    background: linear-gradient(to right, #ffe86f, #f5d142) !important;
-    transform: scale(1.05);
-    box-shadow: 0 6px 16px rgba(255, 232, 111, 0.4);
+h1.title {
+  font-size: 2.2rem;
+  margin-bottom: 10px;
+  animation: neon-glow 2s ease-in-out infinite alternate;
 }
-"""
 
-# Criação da interface
-with gr.Blocks(css=css, theme=gr.themes.Soft()) as demo:
-    gr.Markdown("# 🤖 ChatBoy Assistent<br><span style='font-size:16px; color:#ccc;'>Tire dúvidas sobre nossos bots para Discord</span>")
+@keyframes neon-glow {
+  0%, 100% {
+    text-shadow: 0 0 5px #5865f2, 0 0 10px #5865f2, 0 0 15px #5865f2;
+  }
+  50% {
+    text-shadow: 0 0 15px #5865f2, 0 0 20px #5865f2, 0 0 25px #5865f2;
+  }
+}
 
-    chatbot = gr.Chatbot(height=450)
+p.subtitle {
+  font-size: 1rem;
+  color: #cbd5e1;
+  margin-bottom: 20px;
+}
 
-    with gr.Row():
-        msg = gr.Textbox(placeholder="Digite sua pergunta aqui...", label="", scale=8)
-        send = gr.Button("Enviar", scale=2)
+.scanner {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto;
+  border: 2px dashed #5865f2;
+  border-radius: 50%;
+  position: relative;
+  animation: pulse-ring 1.5s infinite;
+}
 
-    state = gr.State([])
+.scanner::before {
+  content: '';
+  position: absolute;
+  width: 60%;
+  height: 2px;
+  background: #5865f2;
+  top: 50%;
+  left: 20%;
+  animation: scan-bar 2s linear infinite;
+}
 
-    def resposta_wrapper(mensagem, chat_history):
-        resposta = responder(mensagem, chat_history)
-        chat_history = chat_history + [[mensagem, resposta]]
-        return chat_history, chat_history
+@keyframes scan-bar {
+  0% { transform: translateY(-60px); }
+  100% { transform: translateY(60px); }
+}
 
-    send.click(resposta_wrapper, [msg, state], [chatbot, state])
-    msg.submit(resposta_wrapper, [msg, state], [chatbot, state])
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 rgba(88,101,242,0.6); }
+  70% { box-shadow: 0 0 0 10px rgba(88,101,242,0); }
+  100% { box-shadow: 0 0 0 0 rgba(88,101,242,0); }
+}
 
-demo.launch(share=True)
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #2e2e4d;
+  border-radius: 4px;
+  margin-top: 30px;
+  overflow: hidden;
+}
+
+.progress-bar span {
+  display: block;
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(to right, #5865f2, #22c55e);
+  animation: progress 4s ease forwards;
+}
+
+@keyframes progress {
+  to { width: 100%; }
+}
+
+.verified {
+  display: none;
+  animation: fadeInUp 1s ease forwards;
+}
+
+.checkmark {
+  font-size: 3rem;
+  color: #22c55e;
+  margin-bottom: 16px;
+  animation: bounceIn 1s ease;
+}
+
+@keyframes bounceIn {
+  0% { transform: scale(0.5); opacity: 0; }
+  60% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+  </style>
+</head>
+<body>
+  <div class="container" id="verifying">
+    <div class="logo">
+      <img src="https://cdn.icon-icons.com/icons2/2108/PNG/512/discord_icon_130958.png" alt="Discord" width="40">
+    </div>
+    <h1 class="title">Verificando...</h1>
+    <p class="subtitle">Sistema de Segurança Discord</p>
+    <div class="scanner"></div>
+    <div class="progress-bar">
+      <span></span>
+    </div>
+  </div>  <div class="container verified" id="verified">
+    <div class="checkmark">✅</div>
+    <h1 class="title">Verificado com Sucesso</h1>
+    <p class="subtitle">Você pode retornar ao servidor</p>
+  </div>  <script>
+    setTimeout(() => {
+      document.getElementById('verifying').style.display = 'none';
+      document.getElementById('verified').style.display = 'block';
+    }, 4500);
+  </script></body>
+</html>
